@@ -65,3 +65,8 @@ python -m unittest discover -s tests
 ```
 
 If this tool helps your workflow, a star helps other print professionals discover it.
+
+## App preview
+
+![Ink Calculator interface](docs/app-preview.png)
+
