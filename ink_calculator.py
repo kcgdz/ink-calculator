@@ -20,6 +20,7 @@ from dataclasses import dataclass, field
 from typing import Optional, List, Dict, Tuple
 from enum import Enum
 import json
+from pathlib import Path
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -27,7 +28,7 @@ import json
 
 st.set_page_config(
     page_title="Ink Calculator",
-    page_icon="🖨️",
+    page_icon=str(Path(__file__).resolve().parent / "assets" / "favicon.png"),
     layout="wide",
     initial_sidebar_state="expanded"
 )
