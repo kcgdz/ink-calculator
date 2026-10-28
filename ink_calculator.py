@@ -189,7 +189,7 @@ INK_SPECIFICATIONS = {
     },
 }
 
-# Pantone mixing base specifications
+# Mixture mixing base specifications
 BASE_COLOR_SPECIFICATIONS = {
     "C (Cyan)": {
         "typical_density": 1.2,
@@ -241,16 +241,6 @@ BASE_COLOR_SPECIFICATIONS = {
     },
 }
 
-DEFAULT_PANTONE_FORMULAS = {
-    "185 C (Red)": {"C": 0, "M": 80, "Y": 90, "K": 0, "Orange": 0, "Green": 0, "Violet": 0, "Special": 0},
-    "2945 C (Blue)": {"C": 100, "M": 45, "Y": 0, "K": 0, "Orange": 0, "Green": 0, "Violet": 0, "Special": 0},
-    "375 C (Green)": {"C": 60, "M": 0, "Y": 100, "K": 0, "Orange": 0, "Green": 0, "Violet": 0, "Special": 0},
-    "130 C (Orange)": {"C": 0, "M": 30, "Y": 100, "K": 0, "Orange": 0, "Green": 0, "Violet": 0, "Special": 0},
-    "Process Cyan": {"C": 100, "M": 0, "Y": 0, "K": 0, "Orange": 0, "Green": 0, "Violet": 0, "Special": 0},
-    "Process Magenta": {"C": 0, "M": 100, "Y": 0, "K": 0, "Orange": 0, "Green": 0, "Violet": 0, "Special": 0},
-    "Process Yellow": {"C": 0, "M": 0, "Y": 100, "K": 0, "Orange": 0, "Green": 0, "Violet": 0, "Special": 0},
-    "Process Black": {"C": 0, "M": 0, "Y": 0, "K": 100, "Orange": 0, "Green": 0, "Violet": 0, "Special": 0},
-}
 
 # ---------------------------------------------------------------------------
 # Data Classes
@@ -309,7 +299,7 @@ class ConsumptionResult:
 
 
 @dataclass
-class PantoneMixture:
+class InkMixture:
     name: str
     total_kg: float
     components: Dict[str, float]
@@ -365,7 +355,7 @@ class PantoneMixture:
 def init_session_state():
     defaults = {
         "consumption_history": [],
-        "pantone_history": [],
+        "mixture_history": [],
     }
     for key, value in defaults.items():
         if key not in st.session_state:
@@ -590,8 +580,8 @@ def render_consumption_tab():
                 """)
 
 
-def render_pantone_tab():
-    st.header("Pantone Mixture Cost Calculator")
+def render_mixture_tab():
+    st.header("Ink Mixture Cost Calculator")
     
     st.info("Calculate custom ink mixture costs based on component percentages and unit prices.")
     
@@ -637,7 +627,7 @@ def render_pantone_tab():
         st.markdown("---")
         st.subheader("Mixture Formula")
         
-        mixture_name = st.text_input("Mixture Name", value="Pantone 185 C")
+        mixture_name = st.text_input("Mixture Name", value="My ink mixture")
         total_weight = st.number_input("Total Weight (kg)", min_value=0.001, value=5.0, step=0.5, format="%.3f")
         
         st.markdown("**Component Percentages:**")
@@ -645,8 +635,6 @@ def render_pantone_tab():
         pct_cols = st.columns(4)
         components = {}
         
-        # Default values for 185 C
-        defaults_185c = {"C": 0, "M": 80, "Y": 90, "K": 0, "Orange": 0, "Green": 0, "Violet": 0, "Special": 0}
         
         for i, color in enumerate(colors):
             with pct_cols[i % 4]:
@@ -654,7 +642,7 @@ def render_pantone_tab():
                     f"{color} %",
                     min_value=0,
                     max_value=100,
-                    value=defaults_185c.get(color, 0),
+                    value=0,
                     step=5,
                     key=f"pct_{color}"
                 )
@@ -669,7 +657,7 @@ def render_pantone_tab():
         st.subheader("Cost Analysis")
         
         if total_pct == 100:
-            mixture = PantoneMixture(
+            mixture = InkMixture(
                 name=mixture_name,
                 total_kg=total_weight,
                 components=components,
@@ -691,25 +679,9 @@ Unit Cost: **${mixture.unit_cost:,.2f}/kg**
                 """)
                 
                 if st.button("Save Mixture", width="stretch"):
-                    st.session_state["pantone_history"].append(mixture.to_dict())
+                    st.session_state["mixture_history"].append(mixture.to_dict())
                     st.success("Saved")
     
-    # Preset formulas
-    with st.expander("Preset Pantone Formulas"):
-        preset_col1, preset_col2 = st.columns(2)
-        
-        with preset_col1:
-            st.markdown("**Standard Formulas:**")
-            for name, formula in list(DEFAULT_PANTONE_FORMULAS.items())[:4]:
-                active_components = {k: v for k, v in formula.items() if v > 0}
-                st.text(f"{name}: {active_components}")
-        
-        with preset_col2:
-            st.markdown("**Process Colors:**")
-            for name, formula in list(DEFAULT_PANTONE_FORMULAS.items())[4:]:
-                active_components = {k: v for k, v in formula.items() if v > 0}
-                st.text(f"{name}: {active_components}")
-
 
 def render_reference_tab():
     st.header("Technical Reference Data")
@@ -830,23 +802,23 @@ def render_history_tab():
             st.text("No records")
     
     with hist_col2:
-        st.subheader("Pantone Records")
+        st.subheader("Mixture Records")
         
-        if st.session_state["pantone_history"]:
-            df = pd.DataFrame(st.session_state["pantone_history"])
+        if st.session_state["mixture_history"]:
+            df = pd.DataFrame(st.session_state["mixture_history"])
             st.dataframe(df, width="stretch", hide_index=True)
             
             csv = df.to_csv(index=False).encode("utf-8-sig")
             st.download_button(
-                "Download Pantone CSV",
+                "Download Mixture CSV",
                 csv,
-                f"pantone_{datetime.now():%Y%m%d_%H%M%S}.csv",
+                f"mixture_{datetime.now():%Y%m%d_%H%M%S}.csv",
                 "text/csv",
                 width="stretch"
             )
             
-            if st.button("Clear Pantone History", width="stretch"):
-                st.session_state["pantone_history"] = []
+            if st.button("Clear Mixture History", width="stretch"):
+                st.session_state["mixture_history"] = []
                 st.rerun()
         else:
             st.text("No records")
@@ -854,11 +826,11 @@ def render_history_tab():
     st.markdown("---")
     st.subheader("Full Export")
     
-    if st.session_state["consumption_history"] or st.session_state["pantone_history"]:
+    if st.session_state["consumption_history"] or st.session_state["mixture_history"]:
         export_data = {
             "generated_at": datetime.now().isoformat(),
             "consumption_records": st.session_state["consumption_history"],
-            "pantone_records": st.session_state["pantone_history"],
+            "mixture_records": st.session_state["mixture_history"],
         }
         
         json_data = json.dumps(export_data, indent=2, ensure_ascii=False)
@@ -882,7 +854,7 @@ def main():
     
     tab1, tab2, tab3, tab4 = st.tabs([
         "Consumption", 
-        "Pantone Mix", 
+        "Ink Mixtures", 
         "Reference Data",
         "History"
     ])
@@ -891,7 +863,7 @@ def main():
         render_consumption_tab()
     
     with tab2:
-        render_pantone_tab()
+        render_mixture_tab()
     
     with tab3:
         render_reference_tab()

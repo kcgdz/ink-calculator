@@ -53,7 +53,7 @@ Use one currency consistently across your prices. Coverage describes the area co
 - **Reference:** compare the included method ranges and coverage guidelines.
 - **Export:** save estimates as CSV or download all session records as JSON.
 
-The included ranges and mixture presets are starting assumptions, not certified press settings or official Pantone recipes. Validate them against your ink supplier's data and production trials. The g/m² input represents ink laydown per area, rather than volumetric density. History is stored only in the current Streamlit session; download records before leaving.
+The included technical ranges are starting assumptions, not certified press settings. Mixture percentages are supplied by the user; no branded color recipes or color matching are provided. Validate them against your ink supplier's data and production trials. The g/m² input represents ink laydown per area, rather than volumetric density. History is stored only in the current Streamlit session; download records before leaving.
 
 ## Contribute
 

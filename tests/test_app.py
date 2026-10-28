@@ -16,3 +16,16 @@ class AppTests(unittest.TestCase):
 if __name__ == '__main__':
     unittest.main()
 
+
+class MixtureTests(unittest.TestCase):
+    def test_custom_mixture_save(self):
+        app = AppTest.from_file(str(Path(__file__).resolve().parents[1] / 'ink_calculator.py')).run()
+        self.assertFalse(app.exception)
+        self.assertTrue(all(n.value == 0 for n in app.number_input if n.label.endswith(' %')))
+        next(n for n in app.number_input if n.label == 'C (Cyan) %').set_value(100).run()
+        next(b for b in app.button if b.label == 'Save Mixture').click().run()
+        self.assertFalse(app.exception)
+        self.assertEqual(len(app.session_state['mixture_history']), 1)
+        source = (Path(__file__).resolve().parents[1] / 'ink_calculator.py').read_text(encoding='utf-8')
+        self.assertNotIn('pantone', source.lower())
+
