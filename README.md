@@ -1,106 +1,67 @@
-# Ink Consumption Calculator
+<div align="center">
 
-A specialized calculator for security printing and specialty ink industries.
+# Ink Calculator
+### Every drop. A better estimate.
 
-## Formula
+A focused print-production toolkit for ink consumption, job costing, and custom ink mixtures.
 
-```
-Consumption (g) = Area (m²) × Coverage (%) × Ink Density (g/m²) × Substrate Factor
-```
+[**Launch the app →**](https://ink-calculator.streamlit.app) · [Report a bug](https://github.com/kcgdz/ink-calculator/issues) · [Suggest a feature](https://github.com/kcgdz/ink-calculator/issues)
 
-## Supported Printing Methods
+![Python](https://img.shields.io/badge/Python-3.10%2B-182b3a?logo=python&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Built_with-Streamlit-087f8c?logo=streamlit&logoColor=white)
 
-### Offset Printing
-| Method | Density (g/m²) | Viscosity |
-|--------|---------------|-----------|
-| Sheet-fed | 0.7 - 1.5 | 40-100 Pa·s |
-| Heat-set | 0.8 - 1.4 | 40-100 Pa·s |
-| Cold-set | 0.6 - 1.2 | 40-100 Pa·s |
+</div>
 
-### UV Printing
-| Method | Density (g/m²) | Viscosity |
-|--------|---------------|-----------|
-| UV Offset | 0.9 - 1.6 | 5-20 Pa·s |
-| UV Flexo | 0.9 - 2.5 | 0.4-1.0 Pa·s |
-| Process | 0.9 - 1.4 | - |
-| Screen Fine | 0.9 - 1.0 | - |
-| Screen Coarse | 1.2 - 1.5 | - |
-| Lines Coarse | 1.5 - 2.0 | - |
-| Solid Areas | 1.5 - 2.5 | - |
+---
 
-### Other Methods
-| Method | Density (g/m²) | Viscosity |
-|--------|---------------|-----------|
-| Solvent Flexo | 1.0 - 2.0 | 0.1-0.5 Pa·s |
-| Gravure | 1.5 - 4.0 | 0.01-0.1 Pa·s |
-| Screen | 5.0 - 20.0 | 1-10 Pa·s |
-| Digital UV | 1.0 - 2.0 | 0.01-0.05 Pa·s |
-| Digital Aqueous | 0.8 - 1.5 | 0.001-0.01 Pa·s |
-| Digital Solvent | 1.2 - 2.0 | 0.01-0.05 Pa·s |
+## From print brief to production estimate
 
-### Security Inks
-| Method | Density (g/m²) | Application |
-|--------|---------------|-------------|
-| OVI | 2.0 - 4.0 | Screen/Offset |
-| IR Ink | 1.5 - 3.0 | Security features |
-| UV Fluorescent | 1.0 - 2.5 | Authentication |
-| Magnetic | 2.0 - 4.0 | MICR encoding |
+Set your sheet size, coverage and print method. Adjust ink laydown, substrate and waste for your press. Get consumption and cost estimates, then export your job history.
 
-## Features
+| Plan the job | Build a mixture | Keep the numbers |
+| --- | --- | --- |
+| 15 printing methods, including offset, UV flexo, gravure, screen, digital and specialty security inks | Component percentages, individual ink prices and weighted batch costs | Consumption and mixture history with CSV and JSON downloads |
 
-- **15+ Printing Methods**: Offset, UV, Flexo, Gravure, Screen, Digital, Security inks
-- **UV Flexo Variants**: Process, Screen (Fine/Coarse), Lines (Fine/Coarse), Solid Areas
-- **Substrate Factors**: Coated/Uncoated paper, Cardboard, Plastic, Metallized, Security paper
-- **Pantone Mixing**: CMYK + Orange/Green/Violet/Special with cost calculation
-- **Technical Reference**: Industry standard data (ISO/TS 19857, ATEC standards)
-- **Export**: CSV and JSON formats
+## Start in three steps
 
-## Installation
-
-```bash
-# Run setup
-setup.bat
-
-# Or manually
-python -m venv ink_calculator_env
-ink_calculator_env\Scripts\pip install streamlit pandas
+```sh
+git clone https://github.com/kcgdz/ink-calculator.git
+cd ink-calculator
+python -m pip install -r requirements.txt
+python -m streamlit run ink_calculator.py
 ```
 
-## Usage
+On Windows, run `setup.bat` once, then `start.bat`. On macOS/Linux, use `python3` if your Python installation requires it. Python 3.10 or newer is recommended.
 
-```bash
-# Start application
-start.bat
+## How the estimate works
+
+```text
+Ink (g) = area (m²) × (coverage / 100) × laydown (g/m²) × substrate factor
+Job ink (kg) = ink (g) × quantity × (1 + waste / 100) / 1000
+Job cost = job ink (kg) × price per kg
 ```
 
-Open http://localhost:8501 in your browser.
+For example, an A4 sheet (21 × 29.7 cm), 50% coverage, 1 g/m² laydown, substrate factor 1, 10,000 copies and 5% waste needs **0.327 kg** of ink. At 150 currency units/kg, the estimate is **49.12**.
 
-## Data Sources
+Use one currency consistently across your prices. Coverage describes the area covered by the selected ink; estimate separate colors separately when planning a multicolor job.
 
-- ISO/TS 19857 - Colour and transparency of printing ink sets
-- ATEC UV Flexo technical specifications
-- Industry research papers on ink consumption
-- Manufacturer datasheets (Daihei, ATECE, TOKA, etc.)
+## A toolkit for the pressroom
 
-## File Structure
+- **Consumption:** sheet dimensions or direct area, coverage, method presets, custom laydown and substrate factors.
+- **UV flexo:** process, fine/coarse screens, fine/coarse lines and solid-area presets.
+- **Mixtures:** CMYK plus orange, green, violet and special components, with batch and unit costs.
+- **Reference:** compare the included method ranges and coverage guidelines.
+- **Export:** save estimates as CSV or download all session records as JSON.
 
+The included ranges and mixture presets are starting assumptions, not certified press settings or official Pantone recipes. Validate them against your ink supplier's data and production trials. The g/m² input represents ink laydown per area, rather than volumetric density. History is stored only in the current Streamlit session; download records before leaving.
+
+## Contribute
+
+Have a press-specific correction or a workflow improvement? [Open an issue](https://github.com/kcgdz/ink-calculator/issues) with your print method, substrate, expected result and a reproducible example. For changes, include a short explanation and run the checks below.
+
+```sh
+python -m compileall -q ink_calculator.py
+python -m unittest discover -s tests
 ```
-.
-├── ink_calculator.py      # Main application (~32KB)
-├── start.bat              # Windows launcher
-├── setup.bat              # Installation script
-└── README.md
-```
 
-## Requirements
-
-- Python 3.8+
-- Streamlit
-- Pandas
-
-## References
-
-1. ISO/TS 19857:2021 - Graphic technology — Colour and transparency of printing ink sets for four-colour printing
-2. ATECE UV Flexo Technical Data Sheets
-3. Color-Logic FAQ on ink coverage calculations
-4. Research: "Effects of ink consumption on print quality" (Cellulose Chem. Technol.)
+If this tool helps your workflow, a star helps other print professionals discover it.

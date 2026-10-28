@@ -377,9 +377,32 @@ def init_session_state():
 # ---------------------------------------------------------------------------
 
 def render_header():
-    st.title("Ink Consumption Calculator")
-    st.caption("Security Printing & Specialty Ink Industry Tool")
-    st.markdown("---")
+    st.markdown("""
+    <style>
+    .stApp {background: #f6f5f1; color: #182b3a;}
+    .block-container {max-width: 1240px; padding-top: 2rem;}
+    h1,h2,h3 {letter-spacing: -.035em; color: #182b3a;}
+    .ink-hero {background: #142b3b; color: #fff; padding: 42px; border-radius: 20px; margin-bottom: 24px; position: relative; overflow: hidden;}
+    .ink-hero .eyebrow {color: #79ded7; font-size: 12px; letter-spacing: .22em; font-weight: 700;}
+    .ink-hero h1 {color: white; font-size: clamp(32px,5vw,56px); line-height: 1.1; margin: 14px 0; max-width: 800px;}
+    .ink-hero p {color: #c6d5df; max-width: 620px; font-size: 17px;}
+    .ink-chips {display:flex; gap: 10px; flex-wrap:wrap; margin-top:24px;}
+    .ink-chips span {border:1px solid #496070; padding:7px 12px; border-radius:30px; font-size:12px; color:#e3edf2;}
+    .ink-stripe {height:6px; background:linear-gradient(90deg,#21b9d0 0% 25%,#e65591 25% 50%,#f2cc53 50% 75%,#182b3a 75%); border-radius:4px; margin-bottom:20px;}
+    [data-testid="stMetric"] {background:white; padding:20px; border:1px solid #dfe5e6; border-radius:12px;}
+    button[data-baseweb="tab"] {font-weight:600; padding:12px 22px;}
+    .stButton button[kind="primary"] {border-radius:10px; min-height:48px;}
+    @media(max-width:640px) {.ink-hero {padding:25px;} .block-container {padding-top:1rem;}}
+    </style>
+    <div class="ink-stripe"></div>
+    <div class="ink-hero">
+      <div class="eyebrow">INK CALCULATOR / PRINT PRODUCTION TOOLKIT</div>
+      <h1>Every drop.<br>A better estimate.</h1>
+      <p>Turn your next print run into a clear ink and cost estimate. Explore print methods, build custom mixtures, and take your numbers with you.</p>
+      <div class="ink-chips"><span>15 print methods</span><span>Mixture costing</span><span>CSV + JSON export</span></div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.caption("01 Set up your job → 02 Calculate consumption → 03 Export your estimate")
 
 
 def render_print_method_selector() -> Tuple[PrintMethod, Dict]:
@@ -462,6 +485,7 @@ def render_consumption_tab():
                 "Ink Density (g/m²)",
                 min_value=0.001,
                 value=float(default_density),
+                key=f"density_{method.name}_{variant_name}",
                 step=0.1,
                 format="%.3f",
                 help=f"Range: {specs['density_range'][0]}-{specs['density_range'][1]} g/m²"
@@ -475,8 +499,11 @@ def render_consumption_tab():
                 specs['density_range'][1]
             ]
             for val in quick_values:
-                if st.button(f"{val:.2f}", key=f"dens_{val}"):
-                    st.session_state[f"quick_density_{method.name}"] = val
+                st.button(
+                    f"{val:.2f}", key=f"dens_{val}",
+                    on_click=lambda k, v: st.session_state.update({k: v}),
+                    args=(f"density_{method.name}_{variant_name}", float(val)),
+                )
     
     with col2:
         st.subheader("Production Parameters")
@@ -519,7 +546,7 @@ def render_consumption_tab():
     
     st.markdown("---")
     
-    if st.button("Calculate", type="primary", use_container_width=True):
+    if st.button("Calculate", type="primary", width="stretch"):
         result = ConsumptionResult(
             print_method=method,
             area_cm2=area,
@@ -584,7 +611,7 @@ def render_pantone_tab():
                     "Pigment Content": data["pigment_content"],
                     "Lightfastness": data["lightfastness"],
                 })
-            st.dataframe(pd.DataFrame(base_df), hide_index=True, use_container_width=True)
+            st.dataframe(pd.DataFrame(base_df), hide_index=True, width="stretch")
         
         colors = list(BASE_COLOR_SPECIFICATIONS.keys())
         
@@ -652,7 +679,7 @@ def render_pantone_tab():
             costs = mixture.calculate_costs()
             if costs:
                 df = pd.DataFrame(costs)
-                st.dataframe(df, use_container_width=True, hide_index=True)
+                st.dataframe(df, width="stretch", hide_index=True)
                 
                 st.markdown("---")
                 st.markdown(f"""
@@ -663,7 +690,7 @@ Total Cost: **${mixture.total_cost:,.2f}**
 Unit Cost: **${mixture.unit_cost:,.2f}/kg**
                 """)
                 
-                if st.button("Save Mixture", use_container_width=True):
+                if st.button("Save Mixture", width="stretch"):
                     st.session_state["pantone_history"].append(mixture.to_dict())
                     st.success("Saved")
     
@@ -704,7 +731,7 @@ def render_reference_tab():
             })
         
         df_comparison = pd.DataFrame(comparison_data)
-        st.dataframe(df_comparison, hide_index=True, use_container_width=True)
+        st.dataframe(df_comparison, hide_index=True, width="stretch")
         
         st.markdown("---")
         st.subheader("Method Descriptions")
@@ -739,7 +766,7 @@ def render_reference_tab():
                 "Lightfastness": data['lightfastness'],
             })
         
-        st.dataframe(pd.DataFrame(base_data), hide_index=True, use_container_width=True)
+        st.dataframe(pd.DataFrame(base_data), hide_index=True, width="stretch")
     
     with tab3:
         st.subheader("Coverage Guidelines")
@@ -785,7 +812,7 @@ def render_history_tab():
         
         if st.session_state["consumption_history"]:
             df = pd.DataFrame(st.session_state["consumption_history"])
-            st.dataframe(df, use_container_width=True, hide_index=True)
+            st.dataframe(df, width="stretch", hide_index=True)
             
             csv = df.to_csv(index=False).encode("utf-8-sig")
             st.download_button(
@@ -793,10 +820,10 @@ def render_history_tab():
                 csv,
                 f"consumption_{datetime.now():%Y%m%d_%H%M%S}.csv",
                 "text/csv",
-                use_container_width=True
+                width="stretch"
             )
             
-            if st.button("Clear Consumption History", use_container_width=True):
+            if st.button("Clear Consumption History", width="stretch"):
                 st.session_state["consumption_history"] = []
                 st.rerun()
         else:
@@ -807,7 +834,7 @@ def render_history_tab():
         
         if st.session_state["pantone_history"]:
             df = pd.DataFrame(st.session_state["pantone_history"])
-            st.dataframe(df, use_container_width=True, hide_index=True)
+            st.dataframe(df, width="stretch", hide_index=True)
             
             csv = df.to_csv(index=False).encode("utf-8-sig")
             st.download_button(
@@ -815,10 +842,10 @@ def render_history_tab():
                 csv,
                 f"pantone_{datetime.now():%Y%m%d_%H%M%S}.csv",
                 "text/csv",
-                use_container_width=True
+                width="stretch"
             )
             
-            if st.button("Clear Pantone History", use_container_width=True):
+            if st.button("Clear Pantone History", width="stretch"):
                 st.session_state["pantone_history"] = []
                 st.rerun()
         else:
@@ -841,7 +868,7 @@ def render_history_tab():
             json_data,
             f"ink_calculator_report_{datetime.now():%Y%m%d_%H%M%S}.json",
             "application/json",
-            use_container_width=True
+            width="stretch"
         )
 
 
@@ -873,8 +900,10 @@ def main():
         render_history_tab()
     
     st.markdown("---")
-    st.caption("Ink Consumption Calculator | Formula: Area × Coverage × Density × Substrate Factor")
+    st.caption("Estimates use configurable ink laydown and substrate assumptions. Calibrate with your press trials. History lasts for this browser session.")
+    st.link_button("Source & feedback ↗", "https://github.com/kcgdz/ink-calculator")
 
 
 if __name__ == "__main__":
     main()
+

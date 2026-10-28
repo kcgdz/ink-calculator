@@ -43,3 +43,6 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.bak
+
+.uv-cache/
+__pycache__/
